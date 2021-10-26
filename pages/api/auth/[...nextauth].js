@@ -18,25 +18,30 @@ export default NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        // if (credentials.username === process.env.ADMIN_USERNAME) {
-        //   const match = await bcrypt.compare(
-        //     credentials.password,
-        //     process.env.ADMIN_PASSWORD_HASH
-        //   );
-        //   if (match) {
-        //     console.log("admin log in");
-        //     return { name: "admin" };
-        //   }
-        // } else {
-        //   let db = await connectToDatabase();
-        //   let doc = db.collection("users");
-        //   let user = await doc.findOne({ username: credentials.username });
-        //   if (user) {
-        //     console.log("user log in");
-        //     return { name: user };
-        //   }
-        // }
-        // console.log("login fail");
+        if (credentials.username === process.env.ADMIN_USERNAME) {
+          console.log("admin creds")
+          const match = await bcrypt.compare(
+            credentials.password,
+            process.env.ADMIN_PASSWORD_HASH
+          );
+          console.log("compare done")
+          if (match) {
+            console.log("admin log in");
+            return { name: "admin" };
+          }
+        } else {
+          console.log("user creds")
+          let db = await connectToDatabase();
+          console.log("connected to DB")
+          let doc = db.collection("users");
+          let user = await doc.findOne({ username: credentials.username });
+          console.log("found user")
+          if (user) {
+            console.log("user log in");
+            return { name: user };
+          }
+        }
+        console.log("login fail");
         return false;
       },
     }),
