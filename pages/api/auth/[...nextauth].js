@@ -18,22 +18,25 @@ export default NextAuth({
         password: { label: "Password TEST", type: "password" },
       },
       async authorize(credentials, req) {
-        if (credentials.username === "admin") {
-          console.log(credentials.password);
-          console.log(process.env.ADMIN_PASSWORD_HASH);
+        if (credentials.username === process.env.ADMIN_USERNAME) {
           const match = await bcrypt.compare(
             credentials.password,
             process.env.ADMIN_PASSWORD_HASH
           );
-          if (match) return { name: "admin" };
+          if (match) {
+            console.log("admin log in");
+            return { name: process.env.ADMIN_USERNAME };
+          }
         } else {
-          console.log(credentials);
           let db = await connectToDatabase();
           let doc = db.collection("users");
           let user = await doc.findOne({ username: credentials.username });
-          console.log(user);
+          if (user) {
+            console.log("user log in")
+            return {name: user}
+          }
         }
-
+        console.log("login fail");
         return false;
       },
     }),
