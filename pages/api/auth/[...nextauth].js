@@ -14,8 +14,8 @@ export default NextAuth({
       // You can specify whatever fields you are expecting to be submitted.
       // e.g. domain, username, password, 2FA token, etc.
       credentials: {
-        username: { label: "Username TEST", type: "text" },
-        password: { label: "Password TEST", type: "password" },
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
         if (credentials.username === process.env.ADMIN_USERNAME) {
@@ -25,15 +25,15 @@ export default NextAuth({
           );
           if (match) {
             console.log("admin log in");
-            return { name: process.env.ADMIN_USERNAME };
+            return { name: "admin" };
           }
         } else {
           let db = await connectToDatabase();
           let doc = db.collection("users");
           let user = await doc.findOne({ username: credentials.username });
           if (user) {
-            console.log("user log in")
-            return {name: user}
+            console.log("user log in");
+            return { name: user };
           }
         }
         console.log("login fail");
