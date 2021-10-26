@@ -1,8 +1,11 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
+import { connectToDatabase } from "../../../src/util/db";
+import bcrypt from "bcrypt";
 
 export default NextAuth({
   // Configure one or more authentication providers
+  secret: process.env.SECRET_COOKIE_PASSWORD,
   providers: [
     Providers.Credentials({
       // The name to display on the sign in form (e.g. 'Sign in with...')
@@ -11,27 +14,27 @@ export default NextAuth({
       // You can specify whatever fields you are expecting to be submitted.
       // e.g. domain, username, password, 2FA token, etc.
       credentials: {
-        username: { label: "Username TEST", type: "text", placeholder: "TEST" },
+        username: { label: "Username TEST", type: "text" },
         password: { label: "Password TEST", type: "password" },
       },
       async authorize(credentials, req) {
-        console.log(credentials);
-        const user = (credentials, req) => {
-          // You need to provide your own logic here that takes the credentials
-          // submitted and returns either a object representing a user or value
-          // that is false/null if the credentials are invalid.
-          // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-          // You can also use the request object to obtain additional parameters
-          // (i.e., the request IP address)
-          return null;
-        };
-        return null;
-        // if (user) {
-        //   // Any user object returned here will be saved in the JSON Web Token
-        //   return user;
-        // } else {
-        //   return null;
-        // }
+        if (credentials.username === "admin") {
+          console.log(credentials.password);
+          console.log(process.env.ADMIN_PASSWORD_HASH);
+          const match = await bcrypt.compare(
+            credentials.password,
+            process.env.ADMIN_PASSWORD_HASH
+          );
+          if (match) return { name: "admin" };
+        } else {
+          console.log(credentials);
+          let db = await connectToDatabase();
+          let doc = db.collection("users");
+          let user = await doc.findOne({ username: credentials.username });
+          console.log(user);
+        }
+
+        return false;
       },
     }),
   ],
