@@ -18,7 +18,7 @@ export default NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        if (credentials.username === process.env.ADMIN_USERNAME) {
+        if (credentials.username === "admin" ) {
           console.log("admin creds")
           const match = await bcrypt.compare(
             credentials.password,
